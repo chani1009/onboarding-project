@@ -5,12 +5,12 @@ import axios from "axios";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { DiagnosticImages } from "@/model/image";
+import GalleryTabs, { GridNumber } from "@/app/_component/GalleryTabs";
 
-function GalleryBody() {
-	const GridNumberRange = ["1", "2", "3", "4"] as const;
-	type GridNumber = (typeof GridNumberRange)[number];
+const GalleryBody = () => {
 	const [images, setImages] = useState<DiagnosticImages[]>([]);
-	const [selectedGrid, setSelectedGrid] = useState<GridNumber>();
+	const [selectedGrid, setSelectedGrid] = useState<GridNumber>("4");
+	const [breakPoint, setBreakPoint] = useState<GridNumber>("4");
 	const SCREEN_SIZE = {
 		xsm: 360,
 		md: 768,
@@ -20,7 +20,11 @@ function GalleryBody() {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const response = await axios.get<DiagnosticImages[]>("https://picsum.photos/v2/list");
+			const getRandomPage = (min: number, max: number) => {
+				return Math.floor(Math.random() * (max - min + 1)) + min;
+			};
+			const randomPage = getRandomPage(1, 50);
+			const response = await axios.get<DiagnosticImages[]>(`https://picsum.photos/v2/list?page=${randomPage}&limit=20`);
 			setImages(response.data);
 		};
 		fetchData();
@@ -38,7 +42,8 @@ function GalleryBody() {
 			} else if (width < SCREEN_SIZE.xl) {
 				newBreakPoint = "3";
 			}
-			if (newBreakPoint !== selectedGrid) {
+			if (newBreakPoint !== breakPoint) {
+				setBreakPoint(newBreakPoint);
 				setSelectedGrid(newBreakPoint);
 			}
 		};
@@ -49,28 +54,38 @@ function GalleryBody() {
 		};
 	}, [selectedGrid]);
 
-	//해당 배열 4행 grid로 만들기
 	return (
-		<div className={"full flex-1 p-6"}>
-			<div
-				className={clsx("grid gap-3", {
-					"grid-cols-1": selectedGrid === "1",
-					"grid-cols-2": selectedGrid === "2",
-					"grid-cols-3": selectedGrid === "3",
-					"grid-cols-4": selectedGrid === "4",
-				})}
-			>
-				{images.map((image) => (
-					<div
-						key={image.id}
-						className={"bg-gray-200 border-gray-300 rounded-lg aspect-video flex items-center justify-center"}
-					>
-						<Image src={image.download_url} alt={"photo"} className={"object-cover"} width={200} height={300} />
-					</div>
-				))}
+		<div className={"h-full w-full"}>
+			<GalleryTabs
+				onGridSelected={selectedGrid}
+				onGridClick={(gridNumber: GridNumber) => {
+					setSelectedGrid(gridNumber);
+				}}
+			/>
+			<div className={"full flex-1 py-6 px-16"}>
+				<div
+					className={clsx("grid gap-3", {
+						"grid-cols-1": selectedGrid === "1",
+						"grid-cols-2": selectedGrid === "2",
+						"grid-cols-3": selectedGrid === "3",
+						"grid-cols-4": selectedGrid === "4",
+					})}
+				>
+					{images.map((image) => (
+						<div key={image.id} className={"bg-gray-200 border-gray-300 rounded-lg aspect-video overflow-hidden"}>
+							<Image
+								src={image.download_url}
+								alt={"photo"}
+								className={"object-cover h-full w-full"}
+								width={200}
+								height={300}
+							/>
+						</div>
+					))}
+				</div>
 			</div>
 		</div>
 	);
-}
+};
 
 export default GalleryBody;
