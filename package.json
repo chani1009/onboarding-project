@@ -12,9 +12,12 @@
     "@tanstack/react-query": "^5.66.0",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
+    "konva": "^9.3.18",
     "next": "15.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-konva": "^19.0.2",
+    "use-image": "^1.1.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

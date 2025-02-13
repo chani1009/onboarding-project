@@ -4,8 +4,8 @@ import { svg } from "@/image";
 import Image from "next/image";
 import clsx from "clsx";
 
-export type GridNumber = (typeof GridNumberRange)[number];
 const GridNumberRange = ["1", "2", "3", "4"] as const;
+export type GridNumber = (typeof GridNumberRange)[number];
 
 interface Props {
 	onGridClick: (grid: GridNumber) => void;
@@ -30,7 +30,7 @@ const GalleryTabs = ({ onGridClick, onGridSelected }: Props) => {
 								"bg-white border-gray-200": !isSelected,
 							})}
 						>
-							<Image className={"w-6 h-auto"} src={isSelected ? url.active : url.unActive} alt={`GridNum${gridNum}`} />
+							<Image className={"w-6 h-auto"} src={isSelected ? url.active : url.inActive} alt={`GridNum${gridNum}`} />
 						</button>
 					);
 				})}
@@ -39,22 +39,22 @@ const GalleryTabs = ({ onGridClick, onGridSelected }: Props) => {
 	);
 };
 
-const GRID_ICON_URL_INFOS: Record<GridNumber, { active: string; unActive: string }> = {
+const GRID_ICON_URL_INFOS: Record<GridNumber, { active: string; inActive: string }> = {
 	"1": {
 		active: svg.gridButtonOneWhite,
-		unActive: svg.gridButtonOneGray,
+		inActive: svg.gridButtonOneGray,
 	},
 	"2": {
 		active: svg.gridButtonTwoWhite,
-		unActive: svg.gridButtonTwoGray,
+		inActive: svg.gridButtonTwoGray,
 	},
 	"3": {
 		active: svg.gridButtonThreeWhite,
-		unActive: svg.gridButtonThreeGray,
+		inActive: svg.gridButtonThreeGray,
 	},
 	"4": {
 		active: svg.gridButtonFourWhite,
-		unActive: svg.gridButtonFourGray,
+		inActive: svg.gridButtonFourGray,
 	},
 };
 

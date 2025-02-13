@@ -3,11 +3,13 @@
 import clsx from "clsx";
 import axios from "axios";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, DragEvent } from "react";
 import { DiagnosticImages } from "@/model/image";
 import GalleryTabs, { GridNumber } from "@/app/_component/GalleryTabs";
 
 const GalleryBody = () => {
+	const router = useRouter();
 	const [images, setImages] = useState<DiagnosticImages[]>([]);
 	const [selectedGrid, setSelectedGrid] = useState<GridNumber>("4");
 	const [breakPoint, setBreakPoint] = useState<GridNumber>("4");
@@ -18,7 +20,32 @@ const GalleryBody = () => {
 		xxl: 1440,
 	};
 
+	/*	const goToDetailPage = (downloadUrl: string) => {
+		router.push({
+			pathname: "/gallery-detail",
+			query: { imageUrl: downloadUrl },
+		});
+	};*/
+
+	const handleDragStart = (e: DragEvent<HTMLDivElement>, index: number) => {
+		e.dataTransfer.setData("dragIndex", index.toString());
+	};
+
+	const handleDrop = (e: DragEvent<HTMLDivElement>, dropIndex: number) => {
+		const dragIndex = Number(e.dataTransfer.getData("dragIndex"));
+		const updatedImages = [...images];
+		const [draggedImage] = updatedImages.splice(dragIndex, 1);
+		updatedImages.splice(dropIndex, 0, draggedImage);
+
+		setImages(updatedImages);
+	};
+
+	const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+		e.preventDefault(); // 드롭 가능하도록 설정
+	};
+
 	useEffect(() => {
+		//@TODO 리엑트 쿼리(탠스탁 쿼리) / useQuery
 		const fetchData = async () => {
 			const getRandomPage = (min: number, max: number) => {
 				return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -47,12 +74,13 @@ const GalleryBody = () => {
 				setSelectedGrid(newBreakPoint);
 			}
 		};
-		handleResize();
+		// handleResize();
 		window.addEventListener("resize", handleResize);
+
 		return () => {
 			window.removeEventListener("resize", handleResize); //언마운트시 remove...
 		};
-	}, [selectedGrid]);
+	}, []);
 
 	return (
 		<div className={"h-full w-full"}>
@@ -71,8 +99,20 @@ const GalleryBody = () => {
 						"grid-cols-4": selectedGrid === "4",
 					})}
 				>
-					{images.map((image) => (
-						<div key={image.id} className={"bg-gray-200 border-gray-300 rounded-lg aspect-video overflow-hidden"}>
+					{images.map((image, index) => (
+						<div
+							key={image.id}
+							draggable={true}
+							onClick={() => router.push(`/gallery-detail?url=${image.download_url}`)}
+							onDragStart={(e) => {
+								handleDragStart(e, index);
+							}}
+							onDragOver={handleDragOver}
+							onDrop={(e) => {
+								handleDrop(e, index);
+							}}
+							className={"bg-gray-200 border-gray-300 rounded-lg aspect-video overflow-hidden"}
+						>
 							<Image
 								src={image.download_url}
 								alt={"photo"}
