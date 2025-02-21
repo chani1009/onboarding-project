@@ -45,7 +45,7 @@ const GalleryDetail = () => {
 				setPoints((prevPoints) => [...prevPoints, { x, y }]);
 				canvasElement.ctx.fillStyle = "red";
 				canvasElement.ctx.beginPath();
-				canvasElement.ctx.arc(x, y, 3, 0, Math.PI * 2); //5: 반지름
+				canvasElement.ctx.arc(x, y, 3, 0, Math.PI * 2);
 				canvasElement.ctx.fill();
 			}
 		};

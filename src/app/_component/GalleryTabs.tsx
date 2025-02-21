@@ -8,13 +8,15 @@ const GridNumberRange = ["1", "2", "3", "4"] as const;
 export type GridNumber = (typeof GridNumberRange)[number];
 
 interface Props {
+	onRefreshClick: () => void;
 	onGridClick: (grid: GridNumber) => void;
 	onGridSelected: GridNumber;
 }
 
-const GalleryTabs = ({ onGridClick, onGridSelected }: Props) => {
+const GalleryTabs = ({ onRefreshClick, onGridClick, onGridSelected }: Props) => {
 	return (
-		<div className={"bg-gray-50 py-4 px-6 flex justify-end"}>
+		<div className={"bg-gray-50 py-4 px-6 flex justify-between"}>
+			<button onClick={onRefreshClick}>새로고침</button>
 			<div className={"flex gap-x-1.5"}>
 				{GridNumberRange.map((gridNum) => {
 					const url = GRID_ICON_URL_INFOS[gridNum];

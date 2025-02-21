@@ -1,12 +1,13 @@
 "use client";
 
 import clsx from "clsx";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, DragEvent } from "react";
 import { DiagnosticImages } from "@/model/image";
 import GalleryTabs, { GridNumber } from "@/app/_component/GalleryTabs";
+import { getImagesList } from "@/model/model-image";
 
 const GalleryBody = () => {
 	const router = useRouter();
@@ -19,13 +20,6 @@ const GalleryBody = () => {
 		xl: 1280,
 		xxl: 1440,
 	};
-
-	/*	const goToDetailPage = (downloadUrl: string) => {
-		router.push({
-			pathname: "/gallery-detail",
-			query: { imageUrl: downloadUrl },
-		});
-	};*/
 
 	const handleDragStart = (e: DragEvent<HTMLDivElement>, index: number) => {
 		e.dataTransfer.setData("dragIndex", index.toString());
@@ -44,18 +38,13 @@ const GalleryBody = () => {
 		e.preventDefault(); // 드롭 가능하도록 설정
 	};
 
+	const { data, refetch } = useQuery({ queryKey: ["images"], queryFn: () => getImagesList(20) });
+
 	useEffect(() => {
-		//@TODO 리엑트 쿼리(탠스탁 쿼리) / useQuery
-		const fetchData = async () => {
-			const getRandomPage = (min: number, max: number) => {
-				return Math.floor(Math.random() * (max - min + 1)) + min;
-			};
-			const randomPage = getRandomPage(1, 50);
-			const response = await axios.get<DiagnosticImages[]>(`https://picsum.photos/v2/list?page=${randomPage}&limit=20`);
-			setImages(response.data);
-		};
-		fetchData();
-	}, []);
+		if (data) {
+			setImages(data);
+		}
+	}, [data]);
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -74,21 +63,23 @@ const GalleryBody = () => {
 				setSelectedGrid(newBreakPoint);
 			}
 		};
-		// handleResize();
 		window.addEventListener("resize", handleResize);
 
 		return () => {
-			window.removeEventListener("resize", handleResize); //언마운트시 remove...
+			window.removeEventListener("resize", handleResize);
 		};
 	}, []);
 
 	return (
 		<div className={"h-full w-full"}>
 			<GalleryTabs
-				onGridSelected={selectedGrid}
+				onRefreshClick={async () => {
+					await refetch();
+				}}
 				onGridClick={(gridNumber: GridNumber) => {
 					setSelectedGrid(gridNumber);
 				}}
+				onGridSelected={selectedGrid}
 			/>
 			<div className={"full flex-1 py-6 px-16"}>
 				<div
@@ -103,7 +94,7 @@ const GalleryBody = () => {
 						<div
 							key={image.id}
 							draggable={true}
-							onClick={() => router.push(`/gallery-detail?url=${image.download_url}`)}
+							onClick={() => router.push(`/gallery-detail1?url=${image.download_url}`)}
 							onDragStart={(e) => {
 								handleDragStart(e, index);
 							}}
